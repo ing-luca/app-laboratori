@@ -8,25 +8,38 @@
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: system-ui, sans-serif; background:#eef2ff; min-height:100vh; }
     .header { background:#2563eb; color:white; padding:1rem; text-align:center; }
-    .container { max-width:960px; margin:1.5rem auto; padding:1rem; background:white; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,.1); }
+    .header h1 { margin-bottom:.25rem; }
+    .container { max-width:1100px; margin:1.5rem auto; padding:1rem; background:white; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,.1); }
     .section { display:none; }
     .section.active { display:block; }
     .login-form { max-width:360px; margin:0 auto; }
     .form-group { margin-bottom:1rem; }
     label { font-weight:600; margin-bottom:.25rem; display:block; }
-    input { width:100%; padding:.5rem .75rem; border:1px solid #cbd5f5; border-radius:6px; }
-    .btn { display:inline-block; padding:.6rem 1.2rem; border-radius:6px; border:none; cursor:pointer; background:#2563eb; color:white; font-weight:600; width:100%; }
+    input, select { width:100%; padding:.5rem .75rem; border:1px solid #cbd5f5; border-radius:6px; }
+    .btn { display:inline-block; padding:.55rem 1.2rem; border-radius:6px; border:none; cursor:pointer; background:#2563eb; color:white; font-weight:600; }
+    .btn.full { width:100%; }
+    .btn.secondary { background:#6b7280; }
     .role-selector { display:flex; gap:.5rem; margin-bottom:1rem; }
     .role-btn { flex:1; padding:.5rem; border-radius:6px; border:1px solid #2563eb; background:white; color:#2563eb; cursor:pointer; font-weight:600; }
     .role-btn.active { background:#2563eb; color:white; }
-    table { width:100%; border-collapse:collapse; margin-top:1rem; }
-    th, td { padding:.5rem; border-bottom:1px solid #e5e7eb; text-align:left; }
-    .presence-btn { padding:.3rem .7rem; border-radius:999px; border:none; cursor:pointer; font-size:.85rem; }
+    table { width:100%; border-collapse:collapse; margin-top:.75rem; font-size:.9rem; }
+    th, td { padding:.4rem .5rem; border-bottom:1px solid #e5e7eb; text-align:left; }
+    th { background:#eef2ff; }
+    .presence-btn { padding:.25rem .7rem; border-radius:999px; border:none; cursor:pointer; font-size:.75rem; }
     .presence-btn.presente { background:#16a34a; color:white; }
     .presence-btn.assente { background:#ef4444; color:white; }
-    .tabs { display:flex; gap:.25rem; margin:1rem 0; }
-    .tab-btn { flex:1; padding:.5rem; border-radius:6px; border:1px solid #cbd5f5; background:#e5e7eb; cursor:pointer; font-weight:600; }
+    .tabs { display:flex; gap:.25rem; margin:1rem 0; flex-wrap:wrap; }
+    .tab-btn { flex:1; padding:.5rem; border-radius:6px; border:1px solid #cbd5f5; background:#e5e7eb; cursor:pointer; font-weight:600; font-size:.9rem; }
     .tab-btn.active { background:#2563eb; color:white; border-color:#2563eb; }
+    .tab-pane { display:none; margin-top:.5rem; }
+    .tab-pane.active { display:block; }
+    .two-cols { display:flex; gap:1rem; flex-wrap:wrap; }
+    .card { border:1px solid #e5e7eb; border-radius:8px; padding:.75rem; margin-top:.5rem; background:#f9fafb; }
+    .badge { display:inline-block; padding:.15rem .45rem; border-radius:999px; font-size:.75rem; background:#e5e7eb; margin-right:.25rem; }
+    .small { font-size:.8rem; color:#6b7280; }
+    @media (max-width:768px){
+      .two-cols { flex-direction:column; }
+    }
   </style>
 </head>
 <body>
@@ -51,20 +64,26 @@
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" name="password" placeholder="fondazione" required />
+          <input type="password" name="password" placeholder="••••••••" required />
         </div>
-        <button type="submit" class="btn">ACCEDI</button>
-        <p style="margin-top:.5rem; font-size:.85rem; text-align:center; color:#6b7280;">
-          Password: <strong>fondazione</strong>
-        </p>
+        <button type="submit" class="btn full">ACCEDI</button>
       </form>
     </div>
 
-    <!-- SEZIONE STAFF -->
+    <!-- STAFF (DOCENTI/EDUCATORI) -->
     <div id="staff-section" class="section">
-      <button id="logout-staff" class="btn" style="width:auto; float:right; background:#6b7280;">Esci</button>
-      <h2>REGISTRO DEL GIORNO</h2>
-      <p id="staff-info" style="margin:.5rem 0; font-size:.9rem;"></p>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem;">
+        <div>
+          <h2>REGISTRO DEL GIORNO</h2>
+          <p id="staff-info" class="small"></p>
+        </div>
+        <button id="logout-staff" class="btn secondary">Esci</button>
+      </div>
+      <div class="form-group" style="max-width:220px;">
+        <label>Data</label>
+        <input type="date" id="staff-date" />
+      </div>
+      <div id="staff-lab-title" class="small" style="margin:.25rem 0 .5rem 0;"></div>
       <table>
         <thead>
           <tr>
@@ -74,25 +93,112 @@
         </thead>
         <tbody id="staff-table-body"></tbody>
       </table>
+      <p id="staff-no-session" class="small" style="margin-top:.5rem; display:none;">Nessun laboratorio assegnato per questa data.</p>
     </div>
 
-    <!-- SEZIONE ADMIN (solo layout base) -->
+    <!-- ADMIN -->
     <div id="admin-section" class="section">
-      <button id="logout-admin" class="btn" style="width:auto; float:right; background:#6b7280;">Esci</button>
-      <h2>DASHBOARD AMMINISTRATORE</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem;">
+        <h2>DASHBOARD AMMINISTRATORE</h2>
+        <button id="logout-admin" class="btn secondary">Esci</button>
+      </div>
+
       <div class="tabs">
-        <button class="tab-btn active" data-tab="config">CONFIG</button>
-        <button class="tab-btn" data-tab="labs">LAB</button>
+        <button class="tab-btn active" data-tab="labs">LABORATORI</button>
+        <button class="tab-btn" data-tab="students">ALUNNI</button>
         <button class="tab-btn" data-tab="groups">GRUPPI</button>
+        <button class="tab-btn" data-tab="calendar">CALENDARIO</button>
       </div>
-      <div id="config-tab" class="tab-pane">
-        <p>Qui in seguito metteremo la configurazione dettagliata.</p>
+
+      <!-- TAB LABORATORI -->
+      <div id="labs-tab" class="tab-pane active">
+        <div class="form-group two-cols">
+          <div style="flex:1;">
+            <label>Nome laboratorio</label>
+            <input type="text" id="lab-name-input" placeholder="Es. Informatica" />
+          </div>
+          <div style="width:140px; align-self:flex-end;">
+            <button id="add-lab-btn" class="btn full">Aggiungi lab</button>
+          </div>
+        </div>
+        <div id="labs-list"></div>
       </div>
-      <div id="labs-tab" class="tab-pane" style="display:none;">
-        <p>Qui in seguito elenco laboratori.</p>
+
+      <!-- TAB ALUNNI -->
+      <div id="students-tab" class="tab-pane">
+        <div class="form-group two-cols">
+          <div style="flex:1;">
+            <label>Nome alunno</label>
+            <input type="text" id="student-name-input" placeholder="Nome Cognome" />
+          </div>
+          <div style="width:140px; align-self:flex-end;">
+            <button id="add-student-btn" class="btn full">Aggiungi alunno</button>
+          </div>
+        </div>
+        <div id="students-list"></div>
       </div>
-      <div id="groups-tab" class="tab-pane" style="display:none;">
-        <p>Qui in seguito elenco gruppi.</p>
+
+      <!-- TAB GRUPPI -->
+      <div id="groups-tab" class="tab-pane">
+        <div class="form-group two-cols">
+          <div style="flex:1;">
+            <label>Nome gruppo</label>
+            <input type="text" id="group-name-input" placeholder="Es. Gruppo 1" />
+          </div>
+          <div style="width:140px; align-self:flex-end;">
+            <button id="add-group-btn" class="btn full">Aggiungi gruppo</button>
+          </div>
+        </div>
+        <div class="two-cols">
+          <div style="flex:1;">
+            <label>Seleziona gruppo</label>
+            <select id="group-select"></select>
+            <p class="small" style="margin-top:.25rem;">Seleziona il gruppo e poi aggiungi/rimuovi alunni.</p>
+          </div>
+          <div style="flex:1;">
+            <label>Aggiungi alunno al gruppo</label>
+            <select id="group-student-select"></select>
+            <button id="add-student-to-group-btn" class="btn full" style="margin-top:.4rem;">Aggiungi al gruppo</button>
+          </div>
+        </div>
+        <div id="group-detail" class="card" style="margin-top:1rem;"></div>
+      </div>
+
+      <!-- TAB CALENDARIO -->
+      <div id="calendar-tab" class="tab-pane">
+        <div class="two-cols">
+          <div style="flex:1;">
+            <div class="form-group">
+              <label>Data</label>
+              <input type="date" id="cal-date-input" />
+            </div>
+            <div class="form-group">
+              <label>Laboratorio</label>
+              <select id="cal-lab-select"></select>
+            </div>
+            <div class="form-group">
+              <label>Gruppo</label>
+              <select id="cal-group-select"></select>
+            </div>
+          </div>
+          <div style="flex:1;">
+            <div class="form-group">
+              <label>Docente (nome uguale al login)</label>
+              <input type="text" id="cal-docente-input" placeholder="Es. Mario Rossi" />
+            </div>
+            <div class="form-group">
+              <label>Educatore (nome uguale al login)</label>
+              <input type="text" id="cal-educatore-input" placeholder="Es. Anna Verdi" />
+            </div>
+            <div class="form-group">
+              <label>Orario (facoltativo)</label>
+              <input type="text" id="cal-orario-input" placeholder="Es. 14:00-16:00" />
+            </div>
+            <button id="add-session-btn" class="btn full">Aggiungi sessione</button>
+          </div>
+        </div>
+        <h3 style="margin-top:1rem; font-size:1rem;">Sessioni programmate</h3>
+        <div id="sessions-list" class="card"></div>
       </div>
     </div>
   </div>
