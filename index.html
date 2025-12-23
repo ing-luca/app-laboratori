@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LABORATORI POMERIDIANI: SCUOLA CAMOZZI</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.32/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        
+        .header { 
+            background: linear-gradient(90deg, #2c3e50, #3498db); 
+            color: white; 
+            padding: 1rem 2rem; 
+            text-align: center; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .header p { opacity: 0.9; font-size: 1.1rem; }
+        
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        
+        .section { display: none; background: white; border-radius: 15px; padding: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .section.active { display: block; }
+        
+        .login-form { max-width: 400px; margin: 0 auto; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2c3e50; }
+        .form-group input { width: 100%; padding: 12px 16px; border: 2px solid #e1e8ed; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s; }
+        .form-group input:focus { outline: none; border-color: #3498db; }
+        .btn { background: linear-gradient(45deg, #3498db, #2980b9); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s; width: 100%; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-secondary { background: #95a5a6; }
+        
+        .role-selector { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+        .role-btn { flex: 1; padding: 12px; border: 2px solid #3498db; background: white; color: #3498db; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .role-btn.active, .role-btn:hover { background: #3498db; color: white; }
+        
+        .tabs { display: flex; background: #f8f9fa; border-radius: 10px; overflow: hidden; margin-bottom: 2rem; }
+        .tab-btn { flex: 1; padding: 1rem; background: none; border: none; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .tab-btn.active { background: #3498db; color: white; }
+        
+        .table-container { overflow-x: auto; margin-top: 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; font-weight: 600; color: #2c3e50; }
+        .presence-btn { padding: 8px 16px; margin: 0 4px; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; transition: all 0.2s; min-width: 90px; }
+        .presence-btn.presente { background: #27ae60; color: white; }
+        .presence-btn.assente { background: #e74c3c; color: white; }
+        
+        .config-card { background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; border-left: 4px solid #3498db; }
+        .date-nav { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+        .date-nav button { background: #3498db; color: white; border: none; padding: 8px 12px; border-radius: 50%; cursor: pointer; }
+        
+        .loading { text-align: center; padding: 2rem; color: #7f8c8d; }
+        .no-data { text-align: center; padding: 2rem; color: #7f8c8d; font-style: italic; }
+        
+        @media (max-width: 768px) {
+            .container { margin: 1rem; padding: 1rem; }
+            .header h1 { font-size: 1.4rem; }
+            .tabs { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>LABORATORI POMERIDIANI</h1>
+        <p>SCUOLA CAMOZZI con FONDAZIONE DALMINE</p>
+    </div>
+
+    <div class="container">
+        <!-- LOGIN SEMPLICE -->
+        <div id="login-section" class="section active">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #2c3e50;">ACCESSO UTENTI</h2>
+            <div class="role-selector">
+                <button class="role-btn active" data-role="admin">🛠️ AMMINISTRATORE</button>
+                <button class="role-btn" data-role="docente">📚 DOCENTE</button>
+                <button class="role-btn" data-role="educatore">👨‍🏫 EDUCATORI</button>
+            </div>
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label>Il tuo nome</label>
+                    <input type="text" name="name" placeholder="Mario Rossi" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="fondazione" required>
+                </div>
+                <button type="submit" class="btn">ACCEDI</button>
+            </form>
+            <div style="text-align: center; margin-top: 1rem; font-size: 0.9rem; color: #7f8c8d;">
+                Password: <strong>fondazione</strong>
+            </div>
+        </div>
+
+        <!-- STAFF (DOCENTI/EDUCATORI) -->
+        <div id="staff-section" class="section">
+            <button id="logout-btn" class="btn btn-secondary" style="float: right;">Esci</button>
+            <h2>REGISTRO DEL GIORNO</h2>
+            <div class="date-nav">
+                <button id="prev-day">←</button>
+                <input type="date" id="staff-date">
+                <button id="next-day">→</button>
+                <span id="current-lab"></span>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Studente</th>
+                            <th>Presenza</th>
+                            <th>Ultima modifica</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staff-table-body">
+                        <tr><td colspan="3" class="loading">Caricamento...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ADMIN -->
+        <div id="admin-section" class="section">
+            <button id="admin-logout" class="btn btn-secondary" style="float: right;">Esci</button>
+            <h2>DASHBOARD AMMINISTRATORE</h2>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="config">CONFIGURAZIONE</button>
+                <button class="tab-btn" data-tab="labs">LABORATORI</button>
+                <button class="tab-btn" data-tab="groups">GRUPPI</button>
+                <button class="tab-btn" data-tab="export">ESPORTA PDF</button>
+            </div>
+
+            <!-- CONFIG TAB -->
+            <div id="config-tab" class="tab-content active">
+                <div class="config-card">
+                    <h3>CONFIGURAZIONE INIZIALE</h3>
+                    <div class="form-group">
+                        <label>Numero Laboratori</label>
+                        <input type="number" id="num-labs" min="1" max="10" value="4">
+                        <button id="create-labs" class="btn">CREA LAB (Lab1, Lab2...)</button>
+                    </div>
+                    <div class="form-group">
+                        <label>Numero Gruppi</label>
+                        <input type="number" id="num-groups" min="1" max="20" value="4">
+                        <button id="create-groups" class="btn">CREA GRUPPI</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LABS TAB -->
+            <div id="labs-tab" class="tab-content">
+                <h3>LABORATORI</h3>
+                <div class="form-group">
+                    <input type="text" id="lab-name" placeholder="Nome laboratorio (es. Informatica)">
+                    <button id="add-lab" class="btn">AGGIUNGI</button>
+                </div>
+                <div id="labs-list" class="table-container"></div>
+            </div>
+
+            <!-- GROUPS TAB -->
+            <div id="groups-tab" class="tab-content">
+                <h3>GRUPPI</h3>
+                <div class="form-group">
+                    <input type="text" id="group-name" placeholder="Nome gruppo">
+                    <button id="add-group" class="btn">AGGIUNGI</button>
+                </div>
+                <div id="groups-list" class="table-container"></div>
+            </div>
+
+            <!-- EXPORT TAB -->
+            <div id="export-tab" class="tab-content">
+                <h3>ESPORTAZIONE PDF</h3>
+                <div class="form-group">
+                    <label>Data</label>
+                    <input type="date" id="export-date">
+                </div>
+                <button id="export-pdf" class="btn">GENERA PDF</button>
+                <div id="export-preview" class="table-container" style="margin-top: 1rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
